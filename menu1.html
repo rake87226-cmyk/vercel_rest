@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>La Bella — Menu</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .menu-img-wrap { width:100%; height:160px; overflow:hidden; border-radius:8px; margin-bottom:10px }
+    .menu-img { width:100%; height:100%; object-fit:cover; display:block }
+    .menu-card { display:flex; flex-direction:column }
+  </style>
+  
+</head>
+<body>
+  <header class="nav">
+    <div class="container">
+      <h1 class="brand">La Bella</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu</a>
+        <a href="reservation.html">Reservation</a>
+        <a href="contact.html">Contact</a>
+        <a href="feedback.html">Feedback</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-header">
+      <h2>Our Menu</h2>
+      <p>Handpicked dishes crafted with love</p>
+    </div>
+
+    <div class="menu-search" style="margin-bottom:24px">
+      <input type="text" id="menu-search" placeholder="🔍 Search dishes..." style="width:100%;max-width:400px;padding:10px;border:2px solid #eee;border-radius:8px">
+    </div>
+
+    <header class="navs">
+    <div class="contain">
+      <nav>
+        <a href="menu.html">All</a>
+        <a href="menu.html">Breads & Roties</a>
+        <a href="menu3.html">Veg</a>
+        <a href="menu4.html">Fast Food</a>
+      </nav>
+    </div>
+  </header>
+
+
+    <div id="menu-list" class="menu-grid"></div>
+
+    <div style="margin-top:40px">
+      <h3>Order Summary</h3>
+      <div id="order-area" class="order-card">
+        <div id="order-items" class="order-items-list"></div>
+        <div class="order-footer">
+          <div class="order-total">
+            <span class="label">Total:</span>
+            <span class="amount">₹<span id="order-total">0</span></span>
+          </div>
+          <div class="payment-section">
+            <label class="payment-label">Payment Method:
+              <select id="payment-method" class="payment-select">
+                <option value="pay_on_delivery">💰 Pay on Delivery</option>
+                <option value="card">💳 Pay Now (Card)</option>
+              </select>
+            </label>
+            <input id="card-name" placeholder="Name on card (optional)" class="card-input">
+          </div>
+          <button id="place-order" class="btn btn-place-order">Place Order</button>
+        </div>
+      </div>
+      <div id="order-msg" class="order-message" style="margin-top:12px"></div>
+    </div>
+  </main>
+  <section class="cta-sections">
+    <h2>Ready for an Unforgettable Experience?</h2>
+    <p>Book your table today and discover why Bella Vista is New York's premier Italian restaurant.</p>
+
+    <div class="cta-buttonss">
+        <a href="reservation.html" class="btn btn-outline">📅 Make Reservation</a>
+        <a href="tel:5551234567" class="btn btn-dark">📞 Call (555) 123-4567</a>
+    </div>
+</section>
+
+<footer class="footers">
+    <div class="footer-containers">
+
+        <div class="footer-abouts">
+            <h3 class="logos">🍽️ Bella Vista</h3>
+            <p>
+                Experience authentic Italian cuisine in an elegant atmosphere.
+                Fresh ingredients, traditional recipes, and exceptional service since 1985.
+            </p>
+
+            <div class="social-iconss">
+                <a href="#">📘</a>
+                <a href="#">📸</a>
+                <a href="#">🐦</a>
+                <a href="#">▶️</a>
+            </div>
+        </div>
+
+        <div class="footer-linkss">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="#">Menu</a></li>
+                <li><a href="#">Reservations</a></li>
+                <li><a href="#">Reviews</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-contacts">
+            <h4>Contact Info</h4>
+            <ul>
+                <li>📍 123 Culinary Street, Downtown District<br>New York, NY 10001</li>
+                <li>📞 (555) 123-4567</li>
+                <li>✉️ info@bellavista.com</li>
+                <li>🕒 Mon–Sun: 11AM–11PM</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="footer-bottoms">
+        © 2024 Bella Vista Restaurant. All rights reserved.
+    </div>
+</footer>
+
+
+  <script src="app.js"></script>
+  <script>
+    const MENU = [
+      { id: 18, name: 'Chapati', price: 15, desc: 'Whole wheat chapati', img: 'c.jpeg' },
+      { id: 19, name: 'Butter Naan', price: 40, desc: 'Buttery naan', img: 'bn.jpeg' },
+      { id: 20, name: 'Garlic Naan', price: 55, desc: 'Naan with garlic', img: 'gn.jpeg' },
+      { id: 21, name: 'Tandoori Roti', price: 25, desc: 'Tandoor-roasted roti', img: 'tr.jpeg' },
+      { id: 22, name: 'Paratha', price: 35, desc: 'Layered flatbread', img: 'p.jpeg' }
+    ];
+
+    const menuList = document.getElementById('menu-list');
+    const searchInput = document.getElementById('menu-search');
+    let filteredMenu = [...MENU];
+
+    function renderMenu(items) {
+      menuList.innerHTML = '';
+      if (items.length === 0) {
+        menuList.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--muted)">No dishes found</p>';
+        return;
+      }
+      items.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'menu-card';
+        card.style.animationDelay = (idx * 0.05) + 's';
+        card.innerHTML = `
+          <div class="menu-img-wrap"><img src="${item.img || 'https://via.placeholder.com/600x400?text=Food'}" alt="${item.name}" class="menu-img"></div>
+          <div class="menu-card-header">
+            <h4>${item.name}</h4>
+           
+          </div>
+          <p class="menu-desc">${item.desc}</p>
+          <p class="menu-price">₹${item.price}</p>
+          <div class="qty-control">
+            <button class="qty-btn qty-minus" data-id="${item.id}">−</button>
+            <input type="number" min="0" value="0" id="qty-${item.id}" class="qty-input">
+            <button class="qty-btn qty-plus" data-id="${item.id}">+</button>
+          </div>
+          <button class="btn btn-add" data-id="${item.id}">Add to Order</button>
+        `;
+        menuList.appendChild(card);
+      });
+      attachMenuHandlers();
+    }
+
+    function attachMenuHandlers() {
+      document.querySelectorAll('.qty-plus').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = Number(e.target.dataset.id);
+          const input = document.getElementById('qty-' + id);
+          input.value = Math.max(0, Number(input.value) + 1);
+        });
+      });
+      document.querySelectorAll('.qty-minus').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = Number(e.target.dataset.id);
+          const input = document.getElementById('qty-' + id);
+          input.value = Math.max(0, Number(input.value) - 1);
+        });
+      });
+      document.querySelectorAll('.btn-add').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = Number(e.target.dataset.id);
+          const qtyEl = document.getElementById('qty-' + id);
+          const qty = Number(qtyEl.value) || 0;
+          if (qty <= 0) { alert('Select quantity > 0'); return; }
+          addToOrder(id, qty);
+          qtyEl.value = 0;
+        });
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      filteredMenu = MENU.filter(m => m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
+      renderMenu(filteredMenu);
+    });
+
+    window.MENU = MENU;
+    window.addToOrder = (id, qty) => window.addToOrderFunction(id, qty);
+    renderMenu(MENU);
+    initOrdering(MENU);
+  </script>
+</body>
+</html>

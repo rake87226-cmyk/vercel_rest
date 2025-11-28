@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Admin Dashboard - La Bella</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin-dashboard.css">
+</head>
+<body class="admin-body">
+  <header class="admin-nav">
+    <div class="admin-container">
+      <div class="admin-nav-brand">
+        <span class="admin-logo">📊</span>
+        <h1>Admin Dashboard - La Bella</h1>
+      </div>
+      <nav class="admin-nav-menu">
+        <a href="index.html" class="nav-link">🏠 Public Site</a>
+        <a href="admin.html" class="nav-link active">📊 Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <div class="admin-container">
+      <!-- Header Section -->
+      <div class="admin-header">
+        <div>
+          <h2 class="page-title">📋 Booking Management</h2>
+          <p class="page-subtitle">View and manage all reservations and food orders in real-time</p>
+        </div>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">TOTAL BOOKINGS</div>
+          <div class="stat-value" id="total-bookings">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">CONFIRMED</div>
+          <div class="stat-value" id="total-confirmed">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">TOTAL REVENUE</div>
+          <div class="stat-value" id="total-revenue">₹0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">LAST UPDATED</div>
+          <div class="stat-value timestamp" id="last-updated">--:--:-- --</div>
+        </div>
+      </div>
+
+      <!-- Filters and Controls -->
+      <div class="filters-section">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="Search by name, email, or USN..." class="search-input">
+        </div>
+        <div class="filter-controls">
+          <select id="event-filter" class="filter-select">
+            <option value="all">📅 All Events</option>
+            <option value="reservations">🍽️ Reservations</option>
+            <option value="orders">🍕 Food Orders</option>
+          </select>
+          <select id="status-filter" class="filter-select">
+            <option value="all">📊 All Status</option>
+            <option value="confirmed">✅ Confirmed</option>
+            <option value="pending">⏳ Pending</option>
+            <option value="paid">💳 Paid</option>
+          </select>
+          <button class="btn-control refresh-btn" id="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
+          <button class="btn-control export-btn" id="export-btn" onclick="exportCSV()">📥 Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-section">
+        <button class="tab-btn active" data-tab="reservations">🍽️ Reservations</button>
+        <button class="tab-btn" data-tab="orders">🍕 Food Orders</button>
+        <button class="tab-btn" data-tab="feedback">⭐ Feedback</button>
+      </div>
+
+      <!-- Reservations Table -->
+      <div id="reservations-tab" class="tab-content active">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Event</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone no</th>
+              <th>Party Size</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="reservations-table-body">
+            <tr><td colspan="11" style="text-align:center;padding:20px;">Loading...</td></tr>
+          </tbody>
+        </table>
+        <div id="no-reservations" class="empty-state" style="display:none;">
+          <p>No reservations found</p>
+        </div>
+      </div>
+
+      <!-- Orders Table -->
+      <div id="orders-tab" class="tab-content">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Order ID</th>
+              <th>Customer Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Items</th>
+              <th>Total Amount</th>
+              <th>Order Date</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="orders-table-body">
+            <tr><td colspan="11" style="text-align:center;padding:20px;">Loading...</td></tr>
+          </tbody>
+        </table>
+        <div id="no-orders" class="empty-state" style="display:none;">
+          <p>No orders found</p>
+        </div>
+      </div>
+
+      <!-- Feedback Table -->
+      <div id="feedback-tab" class="tab-content">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Rating</th>
+              <th>Comment</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="feedback-table-body">
+            <tr><td colspan="8" style="text-align:center;padding:20px;">Loading...</td></tr>
+          </tbody>
+        </table>
+        <div id="no-feedback" class="empty-state" style="display:none;">
+          <p>No feedback found</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let allReservations = [];
+    let allOrders = [];
+    let allFeedback = [];
+    let currentTab = 'reservations';
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        currentTab = e.target.dataset.tab;
+        document.getElementById(currentTab + '-tab').classList.add('active');
+        filterAndDisplayData();
+      });
+    });
+
+    async function loadData() {
+      try {
+        // Load Reservations
+        const resRes = await fetch('/api/admin/reservations');
+        allReservations = await resRes.json();
+        
+        // Load Orders
+        const ordRes = await fetch('/api/admin/orders');
+        allOrders = await ordRes.json();
+        
+        // Load Feedback
+        const fbRes = await fetch('/api/admin/feedback');
+        allFeedback = await fbRes.json();
+        
+        updateStats();
+        filterAndDisplayData();
+      } catch (err) {
+        console.error('Error loading data:', err);
+      }
+    }
+
+    function updateStats() {
+      const totalBookings = allReservations.length + allOrders.length;
+      const confirmed = allReservations.filter(r => r.status === 'confirmed' || r.paid).length;
+      const totalRevenue = allReservations.reduce((sum, r) => sum + 100, 0) + 
+                          allOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+      
+      document.getElementById('total-bookings').textContent = totalBookings;
+      document.getElementById('total-confirmed').textContent = confirmed;
+      document.getElementById('total-revenue').textContent = '₹' + totalRevenue.toLocaleString();
+      document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+    }
+
+    function filterAndDisplayData() {
+      const searchTerm = document.getElementById('search-input').value.toLowerCase();
+      const eventFilter = document.getElementById('event-filter').value;
+      const statusFilter = document.getElementById('status-filter').value;
+
+      if (currentTab === 'reservations') {
+        displayReservations(searchTerm, statusFilter, eventFilter);
+      } else if (currentTab === 'orders') {
+        displayOrders(searchTerm, statusFilter, eventFilter);
+      } else if (currentTab === 'feedback') {
+        displayFeedback(searchTerm);
+      }
+    }
+
+    function displayReservations(search, status, event) {
+      const tbody = document.getElementById('reservations-table-body');
+      let filtered = allReservations;
+
+      if (search) {
+        filtered = filtered.filter(r => 
+          r.name.toLowerCase().includes(search) || 
+          r.email.toLowerCase().includes(search) ||
+          r.phone.includes(search)
+        );
+      }
+
+      if (status !== 'all') {
+        filtered = filtered.filter(r => {
+          if (status === 'paid') return r.paid;
+          return r.status === status;
+        });
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;">No reservations found</td></tr>';
+      } else {
+        tbody.innerHTML = filtered.map((r, idx) => {
+          const displayStatus = r.paid ? 'paid' : (r.status || 'pending');
+          return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>Reservation</td>
+            <td><strong>${r.name}</strong></td>
+            <td>${r.email || '-'}</td>
+            <td>${r.phone || '-'}</td>
+            <td>Party Size: ${r.party_size}</td>
+            <td>₹100</td>
+            <td>${r.date} ${r.time}</td>
+            <td><span class="status-badge ${displayStatus}">${displayStatus}</span></td>
+            <td><span class="payment-badge ${r.paid ? 'completed' : 'pending'}">${r.paid ? 'completed' : 'pending'}</span></td>
+            <td><button class="btn-action view" onclick="viewReservation(${r.id})">View</button></td>
+          </tr>
+        `;
+        }).join('');
+      }
+    }
+
+    function displayOrders(search, status, event) {
+      const tbody = document.getElementById('orders-table-body');
+      let filtered = allOrders;
+
+      if (search) {
+        filtered = filtered.filter(o => 
+          o.name.toLowerCase().includes(search) || 
+          o.email.toLowerCase().includes(search) ||
+          o.phone.includes(search)
+        );
+      }
+
+      if (status !== 'all') {
+        filtered = filtered.filter(o => {
+          if (status === 'paid') return o.paid;
+          return o.status === status;
+        });
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;">No orders found</td></tr>';
+      } else {
+        tbody.innerHTML = filtered.map((o, idx) => {
+          const itemsList = Array.isArray(o.items) ? 
+            o.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : 
+            'N/A';
+          const displayStatus = o.paid ? 'paid' : (o.status || 'pending');
+          return `
+            <tr>
+              <td>${idx + 1}</td>
+              <td>#${o.id}</td>
+              <td><strong>${o.name}</strong></td>
+              <td>${o.email || '-'}</td>
+              <td>${o.phone || '-'}</td>
+              <td>${itemsList}</td>
+              <td>₹${o.total}</td>
+              <td>${o.created_at?.split(' ')[0] || '-'}</td>
+              <td><span class="status-badge ${displayStatus}">${displayStatus}</span></td>
+              <td><span class="payment-badge ${o.paid ? 'completed' : 'pending'}">${o.paid ? 'completed' : 'pending'}</span></td>
+              <td><button class="btn-action view" onclick="viewOrder(${o.id})">View</button></td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    function displayFeedback(search) {
+      const tbody = document.getElementById('feedback-table-body');
+      let filtered = allFeedback;
+
+      if (search) {
+        filtered = filtered.filter(f => 
+          (f.name && f.name.toLowerCase().includes(search)) || 
+          (f.email && f.email.toLowerCase().includes(search)) ||
+          (f.phone && f.phone.includes(search))
+        );
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;">No feedback found</td></tr>';
+      } else {
+        tbody.innerHTML = filtered.map((f, idx) => `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>${f.name || 'Anonymous'}</td>
+            <td>${f.email || '-'}</td>
+            <td>${f.phone || '-'}</td>
+            <td><span class="rating-badge">⭐ ${f.rating}/5</span></td>
+            <td>${f.comment || '-'}</td>
+            <td>${f.created_at?.split(' ')[0] || '-'}</td>
+            <td><button class="btn-action view" onclick="alert('${f.comment}')">View</button></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function viewReservation(id) {
+      const res = allReservations.find(r => r.id === id);
+      if (res) {
+        alert(`Reservation #${id}\nName: ${res.name}\nDate: ${res.date} ${res.time}\nParty Size: ${res.party_size}\nStatus: ${res.status}\nPaid: ${res.paid ? 'Yes' : 'No'}`);
+      }
+    }
+
+    function viewOrder(id) {
+      const order = allOrders.find(o => o.id === id);
+      if (order) {
+        const items = Array.isArray(order.items) ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : 'N/A';
+        alert(`Order #${id}\nCustomer: ${order.name}\nItems: ${items}\nTotal: ₹${order.total}\nStatus: ${order.status}\nPaid: ${order.paid ? 'Yes' : 'No'}`);
+      }
+    }
+
+    function refreshData() {
+      document.getElementById('refresh-btn').textContent = '⏳ Refreshing...';
+      loadData().then(() => {
+        document.getElementById('refresh-btn').textContent = '🔄 Refresh';
+      });
+    }
+
+    function exportCSV() {
+      let data = [];
+      let headers = [];
+
+      if (currentTab === 'reservations') {
+        headers = ['ID', 'Name', 'Email', 'Phone', 'Date', 'Time', 'Party Size', 'Status', 'Paid'];
+        data = allReservations.map(r => [r.id, r.name, r.email, r.phone, r.date, r.time, r.party_size, r.status, r.paid]);
+      } else if (currentTab === 'orders') {
+        headers = ['ID', 'Customer Name', 'Email', 'Phone', 'Total', 'Status', 'Paid', 'Date'];
+        data = allOrders.map(o => [o.id, o.name, o.email, o.phone, o.total, o.status, o.paid, o.created_at]);
+      }
+
+      let csv = headers.join(',') + '\n';
+      data.forEach(row => {
+        csv += row.map(cell => `"${cell}"`).join(',') + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${currentTab}-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    // Search and filter event listeners
+    document.getElementById('search-input').addEventListener('input', filterAndDisplayData);
+    document.getElementById('event-filter').addEventListener('change', filterAndDisplayData);
+    document.getElementById('status-filter').addEventListener('change', filterAndDisplayData);
+
+    // Initial load
+    loadData();
+
+    // Auto-refresh every 30 seconds
+    setInterval(loadData, 30000);
+  </script>
+
+</body>
+</html>

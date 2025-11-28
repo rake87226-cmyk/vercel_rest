@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Feedback — La Bella</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <div class="container">
+      <h1 class="brand">La Bella</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu</a>
+        <a href="reservation.html">Reservation</a>
+        <a href="contact.html">Contact</a>
+        <a href="feedback.html">Feedback</a>
+        <a href="admin.html">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Feedback & Reviews</h2>
+    <div class="feedback-container">
+      <div class="feedback-form-card">
+        <form id="feedback-form" class="form">
+          <label>Name<input name="name" placeholder="Your name"></label>
+          <label>Email<input name="email" type="email" placeholder="you@example.com"></label>
+          <label>Phone<input name="phone" placeholder="Optional"></label>
+
+          <label>Rating</label>
+          <div class="star-rating" id="star-widget" aria-hidden="false">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+            <input type="hidden" name="rating" id="rating" value="5">
+          </div>
+
+          <label>Comment<textarea name="comment" id="comment" rows="5" placeholder="Tell us about your experience..."></textarea></label>
+          <div class="char-count" id="char-count">0 / 500</div>
+
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+            <button type="submit" class="btn">Send Feedback</button>
+            <div id="msg" style="margin-left:8px;color:var(--muted)"></div>
+          </div>
+        </form>
+
+        <div style="margin-top:14px">
+          <div class="avg-rating" id="avg-rating">0.0</div>
+          <div class="rating-meta" id="rating-meta">0 reviews</div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin-top:0">Recent Reviews</h3>
+        <div id="reviews" class="review-list"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // interactive feedback script
+    function renderReviewCard(f){
+      return `
+        <div class="review-card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>${f.name||'Anonymous'}</strong><div class="rating-meta">${f.email||''} ${f.phone||''}</div></div>
+            <div style="text-align:right"><div style="font-weight:700;color:var(--accent)">${f.rating}/5</div><div style="font-size:0.85rem;color:var(--muted)">${new Date(f.created_at).toLocaleString()}</div></div>
+          </div>
+          <div style="margin-top:8px" class="comment-preview">${f.comment||''}</div>
+        </div>`;
+    }
+
+    async function loadReviews(){
+      const r = await fetch('/api/feedback');
+      const rows = await r.json();
+      const el = document.getElementById('reviews');
+      if (!rows || rows.length === 0) el.innerHTML = '<p>No reviews yet.</p>';
+      else el.innerHTML = rows.map(renderReviewCard).join('');
+
+      // update average
+      const avg = rows && rows.length ? (rows.reduce((s,x)=>s+x.rating,0)/rows.length) : 0;
+      document.getElementById('avg-rating').textContent = avg ? avg.toFixed(1) : '0.0';
+      document.getElementById('rating-meta').textContent = rows.length + (rows.length===1? ' review':' reviews');
+    }
+
+    // star rating interactions
+    const stars = Array.from(document.querySelectorAll('.star'));
+    const ratingInput = document.getElementById('rating');
+    stars.forEach(s => {
+      s.addEventListener('mouseenter', () => {
+        const v = Number(s.dataset.value);
+        stars.forEach(st => st.classList.toggle('filled', Number(st.dataset.value) <= v));
+      });
+      s.addEventListener('click', () => {
+        const v = Number(s.dataset.value);
+        ratingInput.value = v;
+        stars.forEach(st => st.classList.toggle('filled', Number(st.dataset.value) <= v));
+      });
+    });
+    document.getElementById('star-widget').addEventListener('mouseleave', () => {
+      const v = Number(ratingInput.value) || 5;
+      stars.forEach(st => st.classList.toggle('filled', Number(st.dataset.value) <= v));
+    });
+
+    // char counter for comment
+    const commentEl = document.getElementById('comment');
+    const countEl = document.getElementById('char-count');
+    commentEl.addEventListener('input', () => {
+      const len = commentEl.value.length;
+      countEl.textContent = `${len} / 500`;
+      if(len>500) countEl.style.color='red'; else countEl.style.color='var(--muted)';
+    });
+
+    document.getElementById('feedback-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      const data = {
+        name: f.name.value.trim(),
+        email: f.email.value.trim(),
+        phone: f.phone.value.trim(),
+        rating: Number(document.getElementById('rating').value) || 5,
+        comment: f.comment.value.trim()
+      };
+      const res = await fetch('/api/feedback', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+      const json = await res.json();
+      if (json.error) return showMsg('Error: '+json.error);
+      showMsg('Thank you for your feedback!');
+      f.reset();
+      document.getElementById('rating').value = 5;
+      stars.forEach(st => st.classList.toggle('filled', Number(st.dataset.value) <= 5));
+      commentEl.dispatchEvent(new Event('input'));
+      loadReviews();
+    });
+
+    function showMsg(txt){ document.getElementById('msg').textContent = txt }
+    // init
+    loadReviews();
+  </script>
+</body>
+</html>

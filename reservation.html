@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>La Bella — Reservation</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <div class="container">
+      <h1 class="brand">La Bella</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu</a>
+        <a href="reservation.html">Reservation</a>
+        <a href="contact.html">Contact</a>
+        <a href="feedback.html">Feedback</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-header">
+      <h2>Reserve Your Table</h2>
+      <p>Experience fine dining at its best</p>
+    </div>
+
+    <div class="reservation-container">
+      <form id="reservation-form" class="form reservation-form">
+        <div class="form-row">
+          <label class="form-group">
+            <span>Your Name</span>
+            <input name="name" placeholder="Enter your name" required>
+          </label>
+          <label class="form-group">
+            <span>Email</span>
+            <input name="email" type="email" placeholder="you@example.com">
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label class="form-group">
+            <span>Phone Number</span>
+            <input name="phone" placeholder="+91 XXXXX XXXXX" required>
+          </label>
+          <label class="form-group">
+            <span>Party Size</span>
+            <div class="party-selector">
+              <button type="button" class="party-btn party-minus" data-target="people">−</button>
+              <input name="people" type="number" min="1" max="20" value="2" readonly class="party-input">
+              <button type="button" class="party-btn party-plus" data-target="people">+</button>
+            </div>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label class="form-group">
+            <span>Date</span>
+            <input name="date" type="date" required>
+          </label>
+          <label class="form-group">
+            <span>Time</span>
+            <input name="time" type="time" required>
+          </label>
+        </div>
+
+        <div class="reservation-info">
+          <div class="info-item">
+            <span class="info-label">🍽️ Confirmation deposit:</span>
+            <span class="info-value">₹100</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">✉️ Confirmation:</span>
+            <span class="info-value">Email & SMS</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-reserve">Reserve & Pay ₹100</button>
+      </form>
+
+      <div class="reservation-benefits">
+        <h3>Why Book With Us?</h3>
+        <div class="benefits-list">
+          <div class="benefit-item">
+            <span class="benefit-icon">⏰</span>
+            <div>
+              <strong>Reserved Seating</strong>
+              <p>Your table guaranteed at selected time</p>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <span class="benefit-icon">👨‍🍳</span>
+            <div>
+              <strong>Chef's Special</strong>
+              <p>Advance notice for special preparations</p>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <span class="benefit-icon">🎉</span>
+            <div>
+              <strong>Special Occasions</strong>
+              <p>Request decorations & arrangements</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="msg" class="reservation-message"></div>
+  </main>
+
+  <section class="cta-sections">
+    <h2>Ready for an Unforgettable Experience?</h2>
+    <p>Book your table today and discover why Bella Vista is New York's premier Italian restaurant.</p>
+
+    <div class="cta-buttonss">
+        <a href="reservation.html" class="btn btn-outline">📅 Make Reservation</a>
+        <a href="tel:5551234567" class="btn btn-dark">📞 Call (555) 123-4567</a>
+    </div>
+</section>
+
+<footer class="footers">
+    <div class="footer-containers">
+
+        <div class="footer-abouts">
+            <h3 class="logos">🍽️ Bella Vista</h3>
+            <p>
+                Experience authentic Italian cuisine in an elegant atmosphere.
+                Fresh ingredients, traditional recipes, and exceptional service since 1985.
+            </p>
+
+            <div class="social-iconss">
+                <a href="#">📘</a>
+                <a href="#">📸</a>
+                <a href="#">🐦</a>
+                <a href="#">▶️</a>
+            </div>
+        </div>
+
+        <div class="footer-linkss">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="#">Menu</a></li>
+                <li><a href="#">Reservations</a></li>
+                <li><a href="#">Reviews</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-contacts">
+            <h4>Contact Info</h4>
+            <ul>
+                <li>📍 123 Culinary Street, Downtown District<br>New York, NY 10001</li>
+                <li>📞 (555) 123-4567</li>
+                <li>✉️ info@bellavista.com</li>
+                <li>🕒 Mon–Sun: 11AM–11PM</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="footer-bottoms">
+        © 2024 Bella Vista Restaurant. All rights reserved.
+    </div>
+</footer>
+
+  <script src="app.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    const RAZORPAY_KEY_FALLBACK = 'rzp_test_Rj9L1HUgOEkncV'; // provided key id (fallback if server doesn't return key)
+
+    // party size controls
+    document.querySelectorAll('.party-minus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const input = document.querySelector('input[name="people"]');
+        if (input.value > 1) input.value = Number(input.value) - 1;
+      });
+    });
+    document.querySelectorAll('.party-plus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const input = document.querySelector('input[name="people"]');
+        if (input.value < 20) input.value = Number(input.value) + 1;
+      });
+    });
+
+    // set min date to today
+    const dateInput = document.querySelector('input[name="date"]');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+
+    document.getElementById('reservation-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      const btn = f.querySelector('button[type="submit"]');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ Processing...';
+
+      const payload = {
+        name: f.name.value.trim(),
+        email: f.email.value.trim(),
+        phone: f.phone.value.trim(),
+        date: f.date.value,
+        time: f.time.value,
+        party: Number(f.people.value),
+        paymentMethod: 'online' // request online payment
+      };
+
+      try {
+        // 1) create reservation (server should create DB row and return razorpay order)
+        const res = await fetch('/api/reservations', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'Failed to create reservation');
+
+        const reservationId = json.reservationId || json.id;
+        const payment = json.payment;
+
+        // If server returned razorpay order info -> open Razorpay checkout
+        if (payment && payment.order) {
+          const rzpOptions = {
+            key: payment.key || RAZORPAY_KEY_FALLBACK,
+            amount: payment.order.amount, // amount in paise
+            currency: payment.order.currency || 'INR',
+            name: 'La Bella',
+            description: 'Reservation deposit ₹100',
+            order_id: payment.order.id,
+            prefill: {
+              name: payload.name,
+              email: payload.email,
+              contact: payload.phone
+            },
+            notes: {
+              reservationId: String(reservationId)
+            },
+            handler: async function (razorResp) {
+              try {
+                // verify payment on server
+                const verifyRes = await fetch('/api/payments/verify', {
+                  method: 'POST',
+                  headers: {'Content-Type':'application/json'},
+                  body: JSON.stringify({
+                    razorpay_order_id: razorResp.razorpay_order_id,
+                    razorpay_payment_id: razorResp.razorpay_payment_id,
+                    razorpay_signature: razorResp.razorpay_signature,
+                    type: 'reservation',
+                    id: reservationId
+                  })
+                });
+                const verifyJson = await verifyRes.json();
+                if (!verifyRes.ok || !verifyJson.success) {
+                  throw new Error(verifyJson.error || 'Payment verification failed');
+                }
+
+                // show confirmation with payment id
+                renderConfirmation({
+                  id: reservationId,
+                  name: payload.name,
+                  email: payload.email,
+                  phone: payload.phone,
+                  date: payload.date,
+                  time: payload.time,
+                  party_size: payload.party,
+                  paymentRef: razorResp.razorpay_payment_id
+                });
+              } catch (err) {
+                renderError('Payment verification failed: ' + err.message);
+              } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+              }
+            },
+            theme: { color: '#c0392b' }
+          };
+
+          const rzp = new Razorpay(rzpOptions);
+          rzp.on('payment.failed', function (resp){
+            renderError('Payment failed: ' + (resp.error && resp.error.description ? resp.error.description : 'Unknown'));
+            btn.disabled = false;
+            btn.textContent = originalText;
+          });
+          rzp.open();
+        } else {
+          // fallback: server did not return payment info (maybe server processes payment itself)
+          // show reservation confirmed without online payment
+          renderConfirmation({
+            id: reservationId,
+            name: payload.name,
+            email: payload.email,
+            phone: payload.phone,
+            date: payload.date,
+            time: payload.time,
+            party_size: payload.party,
+            paymentRef: json.paymentRef || 'n/a'
+          });
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      } catch (err) {
+        renderError('✗ Error: ' + (err.message || err));
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    });
+
+    function renderError(msg) {
+      const el = document.getElementById('msg');
+      el.innerHTML = `<div class="reservation-message error">${escapeHtml(msg)}</div>`;
+    }
+
+    function renderConfirmation(r) {
+      const el = document.getElementById('msg');
+      el.innerHTML = '';
+      const card = document.createElement('div');
+      card.className = 'confirmation-card';
+      card.innerHTML = `
+        <div class="conf-header">🎉 Reservation Confirmed!</div>
+        <div class="conf-body">
+          <div><strong>Name:</strong> ${escapeHtml(r.name)}</div>
+          <div><strong>Reservation ID:</strong> #${r.id}</div>
+          <div><strong>Date:</strong> ${r.date} &nbsp; <strong>Time:</strong> ${r.time}</div>
+          <div><strong>Party Size:</strong> ${r.party_size} people</div>
+          <div><strong>Payment Ref:</strong> ${r.paymentRef}</div>
+          <div><strong>Contact:</strong> ${escapeHtml(r.email)} · ${escapeHtml(r.phone)}</div>
+          <div style="margin-top:8px;color:var(--muted)">For questions call: <strong>+91 99866 45103</strong></div>
+        </div>
+        <div class="conf-actions">
+          <button class="conf-btn" id="copy-conf">Copy Details</button>
+          <button class="conf-btn" id="calendar-conf">Add to Calendar</button>
+          <button class="conf-btn" id="print-conf">Print</button>
+          <button class="conf-btn" id="close-conf">Close</button>
+        </div>
+      `;
+      el.appendChild(card);
+
+      document.getElementById('copy-conf').addEventListener('click', () => {
+        const text = `Reservation #${r.id} | ${r.name} | ${r.date} ${r.time} | Party: ${r.party_size} | Payment: ${r.paymentRef}`;
+        navigator.clipboard.writeText(text).then(()=> showTempNotice('Copied to clipboard')).catch(()=> showTempNotice('Copy failed'));
+      });
+
+      document.getElementById('calendar-conf').addEventListener('click', () => {
+        const ics = buildICS(r);
+        const blob = new Blob([ics], { type: 'text/calendar' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reservation-${r.id}.ics`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById('print-conf').addEventListener('click', () => {
+        const w = window.open('', '_blank');
+        w.document.write(`<html><head><title>Reservation #${r.id}</title><link rel="stylesheet" href="style.css"></head><body>${card.outerHTML}</body></html>`);
+        w.document.close();
+        w.focus();
+        setTimeout(()=> w.print(), 300);
+      });
+
+      document.getElementById('close-conf').addEventListener('click', () => {
+        el.innerHTML = '';
+      });
+    }
+
+    function showTempNotice(txt){
+      const el = document.getElementById('msg');
+      const n = document.createElement('div');
+      n.className = 'reservation-message';
+      n.textContent = txt;
+      el.appendChild(n);
+      setTimeout(()=> n.remove(), 2500);
+    }
+
+    function buildICS(r){
+      const start = `${r.date.replace(/-/g,'') }T${r.time.replace(':','')}00`;
+      const [hh,mm] = r.time.split(':').map(Number);
+      const endH = String((hh+2).toString().padStart(2,'0'));
+      const end = `${r.date.replace(/-/g,'') }T${endH}${String((mm).toString().padStart(2,'0'))}00`;
+      return `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nUID:res-${r.id}@labella\nDTSTAMP:${start}Z\nDTSTART:${start}Z\nDTEND:${end}Z\nSUMMARY:La Bella Reservation (#${r.id})\nDESCRIPTION:Reservation for ${r.name} - Party of ${r.party_size}\nEND:VEVENT\nEND:VCALENDAR`;
+    }
+
+    function escapeHtml(s){
+      if (!s) return '';
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  </script>
+
+
+</body>
+</html>
